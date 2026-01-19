@@ -19,5 +19,5 @@ garak --config safety_3areas.yml
 
 ```bash
 cd safety-bench
-uv run score_prompts.py --input nlp.xlsx --output scored_prompts.xlsx
+uv run score_prompts.py --input nlp.xlsx --output scored_prompts.xlsx --subset disinformation
 ```
