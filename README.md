@@ -19,5 +19,7 @@ garak --config safety_3areas.yml
 
 ```bash
 cd safety-bench
+cp .env.example .env
+# edit .env to set OPENAI_API_KEY and OLLAMA_MODEL if needed
 uv run score_prompts.py --input nlp.xlsx --output scored_prompts.xlsx --subset disinformation
 ```

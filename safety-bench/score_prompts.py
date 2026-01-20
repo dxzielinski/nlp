@@ -49,11 +49,11 @@ logger = logging.getLogger("score_prompts")
 SUBSET_SHEETS: Dict[str, Sequence[str]] = {
     "cultural": ("cultural", "cultural z obrazkami"),
     "disinformation": ("disinformation", "disinformation z obrazkami"),
-    "offensive": ("offensive", "offensive z obrazkami"),
+    "offensive": ("offensive z obrazkami",),  # "offensive"
 }
 
 DISINFO_OFFENSIVE_SHEETS = {
-    # "disinformation",
+    "disinformation",
     "disinformation z obrazkami",
     "offensive",
     "offensive z obrazkami",
@@ -175,7 +175,7 @@ def ollama_generate(
     model: str,
     host: str = "http://localhost:11434",
     image_paths: Optional[Sequence[str]] = None,
-    timeout_s: int = 180,
+    timeout_s: int = 1800,  # default 180 for text-only
 ) -> str:
     """
     Calls Ollama HTTP API: POST {host}/api/generate

@@ -207,3 +207,4 @@ marimo/_lsp/
 __marimo__/
 
 safety-bench/results-analysis/*.py
+safety-bench/results/disinformation_scored*.xlsx
