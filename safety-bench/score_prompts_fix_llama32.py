@@ -21,10 +21,10 @@ from score_prompts import (
 )
 
 
-RESULTS_DIR = Path(__file__).resolve().parent / "results"
-DEFAULT_INPUT = RESULTS_DIR / "disinformation_scored_llama32.xlsx"
-DEFAULT_OUTPUT = RESULTS_DIR / "fix_llama32.xlsx"
-SHEET_NAME = "disinformation z obrazkami"
+RESULTS_DIR = Path(__file__).resolve().parent  # / "results"
+DEFAULT_INPUT = RESULTS_DIR / "scored_offensive_obrazki.xlsx"
+DEFAULT_OUTPUT = RESULTS_DIR / "fix_scored_offensive_obrazki.xlsx"
+SHEET_NAME = "offensive z obrazkami"
 
 
 def pick_reason_column(df: pd.DataFrame) -> str:
@@ -107,11 +107,14 @@ def main() -> int:
                 client = None
 
     df = pd.read_excel(cfg.input_xlsx, sheet_name=SHEET_NAME, engine="openpyxl")
+    # reason_col contains reason_substring or actual_response is empty
     reason_col = pick_reason_column(df)
     mask = (
         df[reason_col]
         .astype(str)
         .str.contains(args.reason_substring, case=False, na=False)
+        | df["actual_response"].isna()
+        | df["actual_response"].astype(str).str.strip().eq("")
     )
     df_filtered = df.loc[mask].copy()
     logger.info(

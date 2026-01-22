@@ -100,12 +100,12 @@ def extract_https_urls(text: str) -> List[str]:
     return re.findall(r"https://[^\s)\]}>\"']+", text or "")
 
 
-def extract_png_refs(text: str) -> List[str]:
+def extract_image_refs(text: str) -> List[str]:
     """
-    Extract .png references that look like local file names/paths.
+    Extract .png/.jpg/.jpeg references that look like local file names/paths.
     Skips scheme-based URLs that would start with "//".
     """
-    matches = re.findall(r"(?i)(?:^|[^\w/.-])([\w/.-]+\.png)", text or "")
+    matches = re.findall(r"(?i)(?:^|[^\w/.-])([\w/.-]+\.(?:png|jpg|jpeg))", text or "")
     return [m for m in matches if not m.startswith("//")]
 
 
@@ -175,7 +175,7 @@ def ollama_generate(
     model: str,
     host: str = "http://localhost:11434",
     image_paths: Optional[Sequence[str]] = None,
-    timeout_s: int = 1800,  # default 180 for text-only
+    timeout_s: int = 2400,  # default 180 for text-only
 ) -> str:
     """
     Calls Ollama HTTP API: POST {host}/api/generate
@@ -212,7 +212,7 @@ def resolve_local_images_from_prompt(
 ) -> Tuple[str, List[str]]:
     """
     Variant handler: prompt may include https://... image URL(s)
-    or local .png references. We detect them and try to find
+    or local image references. We detect them and try to find
     corresponding local file(s).
 
     Search strategies (first hit wins per URL):
@@ -222,7 +222,7 @@ def resolve_local_images_from_prompt(
       3) {image_base_dir}/{sheet_name or ""}/{safe_url_id(url)}.{ext}
          ext in [jpg, jpeg, png, webp]
 
-    Search strategies (first hit wins per .png reference):
+    Search strategies (first hit wins per local image reference):
       1) {image_base_dir}/{sheet_name or ""}/{ref_path}
       2) {image_base_dir}/{sheet_name or ""}/{ref_filename}
       3) {image_base_dir}/{ref_path} (fallback if sheet_name provided)
@@ -231,8 +231,8 @@ def resolve_local_images_from_prompt(
     Returns: (clean_prompt_without_urls, [image_path,...])
     """
     urls = extract_https_urls(prompt)
-    png_refs = extract_png_refs(prompt)
-    if not urls and not png_refs:
+    image_refs = extract_image_refs(prompt)
+    if not urls and not image_refs:
         return prompt, []
 
     subdir = sheet_name or ""
@@ -280,7 +280,7 @@ def resolve_local_images_from_prompt(
                 len(candidates),
             )
 
-    for ref in png_refs:
+    for ref in image_refs:
         ref_norm = ref.replace("\\", "/").lstrip("/")
         ref_norm = os.path.normpath(ref_norm)
         if ref_norm.startswith(".."):
@@ -298,7 +298,7 @@ def resolve_local_images_from_prompt(
             found_paths.append(hit)
         else:
             logger.warning(
-                "No local image found for .png ref: %s (tried %d candidates)",
+                "No local image found for image ref: %s (tried %d candidates)",
                 ref,
                 len(candidates),
             )
@@ -495,7 +495,7 @@ def process_disinfo_or_offensive_sheet(
         row = df.iloc[i]
         prompt_text = get_effective_prompt(row)
 
-        # (Optional) handle image URLs/.png refs too (won't hurt if none exist)
+        # (Optional) handle image URLs/local image refs too (won't hurt if none exist)
         clean_prompt, image_paths = resolve_local_images_from_prompt(
             prompt_text,
             image_base_dir=cfg.image_base_dir,
