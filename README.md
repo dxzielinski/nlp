@@ -2,6 +2,20 @@
 
 NLP
 
+## Repository structure
+
+```bash
+-- nlp
+   |
+   |-- POC/                   # Proof of concept code and results
+   |-- safety-bench/          # Safety benchmark code and data
+   |-- safety-bench/results-analysis/  # Full analysis of safety benchmark results
+   |-- safety-bench/images    # Disinformation/offensive images part of the benchmark
+   |-- safety-bench/nlp.xlsx  # Safety benchmark prompts for all 3 categories
+   |-- safety-bench/results   # Safety benchmark results - all prompts/responses/scores and judge reasons
+   |-- safety-bench/results/hardware # Hardware-specific metrics collected during benchmark runs
+```
+
 ## Reproducibility of POC
 
 Assuming there is local ollama and garak installations:
